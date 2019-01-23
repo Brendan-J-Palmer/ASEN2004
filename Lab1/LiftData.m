@@ -69,6 +69,13 @@ e0 = 1.78 * (1 - 0.045 .* AR.^(0.68)) - 0.64;
 k1 = 1 / (pi * e * AR);
 k2 = -2 * k1 * CL_MinDrag;
 
+CFE = .004;
+SWet = 1.2874 + .784142 + .1992;
+Sref = .63;
+CD_minalt = CFE * SWet / Sref; 
+CD_0alt = CD_minalt + k1 * CL_MinDrag^2;
+CDalt = CD_0alt + k1 * CL_3D .^2 + k2 * CL_3D;
+
 %total polar drag for aircraft
 CD_Polar = min(WingD) + k1 * ((CL_3D - CL_MinDrag) .^ 2);
 
@@ -137,3 +144,14 @@ title('Compare C_L over C_D for Calculated and CFD Data');
 legend('Calculated Wing Lift over Drag', 'CFD Lift over Drag', 'Location', 'Northwest');
 xlabel('\alpha (\circ)');
 ylabel('C_L / C_D');
+
+%% compare methods for finding drag polar
+figure(4)
+plot(CL_3D, CD_Polar, '--', 'LineWidth', 2);
+hold on
+plot(CL_3D, CDalt, '--', 'LineWidth', 2);
+hold off;
+title('Compare the Methods of Calculating Wing Drag');
+legend('k1', 'k1 & k2', 'Location', 'Northwest');
+xlabel('C_L');
+ylabel('C_D');
