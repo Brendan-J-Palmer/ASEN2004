@@ -48,7 +48,7 @@ a = (a_0)/(1 + ((57.3 * a_0)/(pi * e * AR)));
 
 %find zero lift angle of attack
 sign = find(Clift>0,1);
-Alpha0 = (Clift(sign) - Clift(sign - 1))/(alpha(sign) - alpha(sign - 1)) * (alpha(sign));
+Alpha0 = mean([alpha(sign), alpha(sign - 1)]);
 
 %use alpha to calculate cl
 CL_3D = a .* ( alpha - Alpha0);
@@ -56,16 +56,19 @@ CL_3D = a .* ( alpha - Alpha0);
 % 3D coefficient of drag
 D_i = (CL_3D).^2 ./ (pi*e*AR);
 
-%calculate total drag
-D = CDrag + D_i;
+%calculate total drag for wing
+WingD = CDrag + D_i;
 
 %find min drag alpha value
-MinDragAlpha = alpha(find(D == min(D)));
+CL_MinDrag = CL_3D(find(WingD == min(WingD)));
 
 %define variables
 %oswald's efficiency factor
 e0 = 1.78 * (1 - 0.045 .* AR.^(0.68)) - 0.64;
-k = 1 / (pi * e0 * AR);
+k = 1 / (pi * e * AR);
+
+%total polar drag for aircraft
+CD_Polar = min(WingD) + k * ((CL_3D - CL_MinDrag) .^ 2);
 
 %For CFD
 dataCFD=[
@@ -92,15 +95,43 @@ alphaCFD = dataCFD(:,1); % Angle of attack
 CliftCFD = dataCFD(:,2); % 3D coefficient of lift
 CDragCFD = dataCFD(:,3); % 3D coefficient of drag
 
-%plot and compare the results
+%% plot and compare the lift with respect to alpha
 figure(1)
-plot(alpha, CL_3D);
+plot(alpha, CL_3D, '--', 'LineWidth', 2);
 hold on
-plot(alphaCFD, CliftCFD);
+plot(alphaCFD, CliftCFD, '--', 'LineWidth', 2);
 hold on
-plot(alpha, Clift);
+plot(alpha, Clift, '--', 'LineWidth', 2);
 hold off
 
 %mark each plot
-title('Compare Results of Calculated and CFD Data');
-legend('3D Calculated Data', 'CFD Data', '2D Calculated Data');
+title('Compare Lift Results of Calculated and CFD Data');
+legend('3D Calculated Data', 'CFD Data', '2D Calculated Data', 'Location', 'Southeast');
+xlabel('\alpha (\circ)');
+ylabel('C_L');
+
+%% compare the Drag with respect to lift
+figure(2)
+plot(CL_3D, CD_Polar, '--', 'LineWidth', 2);
+hold on
+plot(CL_3D, WingD, '--', 'LineWidth', 2);
+hold on
+plot(CliftCFD, CDragCFD, '--', 'LineWidth', 2);
+hold off
+title('Compare Polar Drag Results of Calculated and CFD Data');
+legend('3D Calculated Polar Drag', 'Calculated Wing Drag', 'CFD Polar Drag', 'Location', 'Northwest');
+xlabel('C_L');
+ylabel('C_D');
+
+%% Plot and compare the C_L/C_D with respect to alpha
+figure(3)
+CLCD3D =  CL_3D./WingD;
+CLCDCFD = CliftCFD./CDragCFD;
+plot(alpha, CLCD3D, '--', 'LineWidth', 2);
+hold on
+plot(alphaCFD, CLCDCFD, '--', 'LineWidth', 2);
+hold off
+title('Compare C_L over C_D for Calculated and CFD Data');
+legend('Calculated Wing Lift over Drag', 'CFD Lift over Drag', 'Location', 'Northwest');
+xlabel('\alpha (\circ)');
+ylabel('C_L / C_D');
