@@ -60,15 +60,17 @@ D_i = (CL_3D).^2 ./ (pi*e*AR);
 WingD = CDrag + D_i;
 
 %find min drag alpha value
-CL_MinDrag = CL_3D(find(WingD == min(WingD)));
+alpha_MinDrag = alpha(find(WingD == min(WingD)));
+CL_MinDrag = a * (alpha_MinDrag - Alpha0);
 
 %define variables
 %oswald's efficiency factor
 e0 = 1.78 * (1 - 0.045 .* AR.^(0.68)) - 0.64;
-k = 1 / (pi * e * AR);
+k1 = 1 / (pi * e * AR);
+k2 = -2 * k1 * CL_MinDrag;
 
 %total polar drag for aircraft
-CD_Polar = min(WingD) + k * ((CL_3D - CL_MinDrag) .^ 2);
+CD_Polar = min(WingD) + k1 * ((CL_3D - CL_MinDrag) .^ 2);
 
 %For CFD
 dataCFD=[
