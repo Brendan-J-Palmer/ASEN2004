@@ -148,7 +148,7 @@ hold on
 plot(CliftCFD, CDragCFD, '--', 'LineWidth', 2);
 hold off
 title('Compare Polar Drag Results of Calculated and CFD Data', 'FontSize', 14);
-legend('Finite Wing Drag', 'Calculated Wing Drag', 'CFD Polar Drag', 'Location', 'Northwest');
+legend('Finite Wing Drag', 'Polar Drag Whole Aircraft', 'CFD Polar Drag', 'Location', 'Northwest');
 xlabel('C_L');
 ylabel('C_D');
 grid minor
