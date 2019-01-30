@@ -66,7 +66,7 @@ CL_MinDrag = a * (alpha_MinDrag - Alpha0);
 %define variables
 %oswald's efficiency factor
 e0 = 1.78 * (1 - 0.045 .* AR.^(0.68)) - 0.64;
-k1 = 1 / (pi * e * AR);
+k1 = 1 / (pi * e0 * AR);
 k2 = -2 * k1 * CL_MinDrag;
 
 CFE = .004;
@@ -74,10 +74,8 @@ SWet = 1.2874 + .784142 + .1992;
 Sref = .63;
 CD_minalt = CFE * SWet / Sref; 
 CD_0alt = CD_minalt + k1 * CL_MinDrag^2;
-CDalt = CD_0alt + k1 * CL_3D .^2 + k2 * CL_3D;
-
-%total polar drag for aircraft
-CD_Polar = min(WingD) + k1 * ((CL_3D - CL_MinDrag) .^ 2);
+%wholeaircraft
+Dalt = CD_0alt + k1 * CL_3D .^2 + k2 * CL_3D;
 
 %For CFD
 dataCFD=[
@@ -104,6 +102,27 @@ alphaCFD = dataCFD(:,1); % Angle of attack
 CliftCFD = dataCFD(:,2); % 3D coefficient of lift
 CDragCFD = dataCFD(:,3); % 3D coefficient of drag
 
+L_D_WholeAirplane = CL_3D ./ Dalt ; 
+L_D_CFD = (CliftCFD./CDragCFD);
+
+%% velocity to achieve max range and max endurance
+
+GOTA = 6.4; % Kg, groos weight
+GOTAWeight = GOTA*9.81;
+Density = 1.0324 ; %kg/m^3 @ 1.8 km.
+WingArea = 0.63 ; % wing area.
+V_MaxRangeEndurance_Equation = @(CL_V) sqrt ( (2 *( GOTAWeight/WingArea)) / ((Density)*CL_V));
+
+CL_Max_Range = sqrt( CD_0alt/k1);
+CL_Max_Endurance = sqrt( (3*CD_0alt)/k1);
+
+
+CL_CD_Ratio_Max_Endurance = GOTAWeight/CD_0alt;
+CL_CD_Ratio_Max_Range = GOTAWeight/CD_0alt;
+
+V_Max_Range = V_MaxRangeEndurance_Equation(CL_Max_Range);
+V_Max_Endurance = V_MaxRangeEndurance_Equation(CL_Max_Endurance);
+
 %% plot and compare the lift with respect to alpha
 figure(1)
 plot(alpha, CL_3D, '--', 'LineWidth', 2);
@@ -114,44 +133,38 @@ plot(alpha, Clift, '--', 'LineWidth', 2);
 hold off
 
 %mark each plot
-title('Compare Lift Results of Calculated and CFD Data');
+title('Compare Lift Results of Calculated and CFD Data', 'FontSize', 14);
 legend('3D Calculated Data', 'CFD Data', '2D Calculated Data', 'Location', 'Southeast');
 xlabel('\alpha (\circ)');
 ylabel('C_L');
+grid minor
 
 %% compare the Drag with respect to lift
 figure(2)
-plot(CL_3D, CD_Polar, '--', 'LineWidth', 2);
-hold on
 plot(CL_3D, WingD, '--', 'LineWidth', 2);
+hold on
+plot(CL_3D, Dalt, '--', 'LineWidth', 2);
 hold on
 plot(CliftCFD, CDragCFD, '--', 'LineWidth', 2);
 hold off
-title('Compare Polar Drag Results of Calculated and CFD Data');
-legend('3D Calculated Polar Drag', 'Calculated Wing Drag', 'CFD Polar Drag', 'Location', 'Northwest');
+title('Compare Polar Drag Results of Calculated and CFD Data', 'FontSize', 14);
+legend('Finite Wing Drag', 'Calculated Wing Drag', 'CFD Polar Drag', 'Location', 'Northwest');
 xlabel('C_L');
 ylabel('C_D');
-
+grid minor
 %% Plot and compare the C_L/C_D with respect to alpha
-figure(3)
-CLCD3D =  CL_3D./WingD;
-CLCDCFD = CliftCFD./CDragCFD;
-plot(alpha, CLCD3D, '--', 'LineWidth', 2);
-hold on
-plot(alphaCFD, CLCDCFD, '--', 'LineWidth', 2);
-hold off
-title('Compare C_L over C_D for Calculated and CFD Data');
-legend('Calculated Wing Lift over Drag', 'CFD Lift over Drag', 'Location', 'Northwest');
-xlabel('\alpha (\circ)');
-ylabel('C_L / C_D');
 
-%% compare methods for finding drag polar
-figure(4)
-plot(CL_3D, CD_Polar, '--', 'LineWidth', 2);
+figure(3)
+
+plot(alpha,L_D_WholeAirplane,'*-','LineWidth',1)
 hold on
-plot(CL_3D, CDalt, '--', 'LineWidth', 2);
-hold off;
-title('Compare the Methods of Calculating Wing Drag');
-legend('k1', 'k1 & k2', 'Location', 'Northwest');
-xlabel('C_L');
-ylabel('C_D');
+plot(alphaCFD,L_D_CFD,'*-','LineWidth',1)
+hold on
+refline(0)
+hold off
+
+legend('3D Wings full L/D','CFD L/D','Location','NorthWest')
+xlabel(' \alpha \circ ')
+ylabel('L/D')
+title('L/D Comparison', 'FontSize', 14)
+grid minor
