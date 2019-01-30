@@ -72,10 +72,10 @@ k2 = -2 * k1 * CL_MinDrag;
 CFE = .004;
 SWet = 1.2874 + .784142 + .1992;
 Sref = .63;
-CD_minalt = CFE * SWet / Sref; 
-CD_0alt = CD_minalt + k1 * CL_MinDrag^2;
+CD_min = CFE * SWet / Sref; 
+CD_0 = CD_min + k1 * CL_MinDrag^2;
 %wholeaircraft
-Dalt = CD_0alt + k1 * CL_3D .^2 + k2 * CL_3D;
+Drag = CD_0 + k1 * CL_3D .^2 + k2 * CL_3D;
 
 %For CFD
 dataCFD=[
@@ -102,23 +102,23 @@ alphaCFD = dataCFD(:,1); % Angle of attack
 CliftCFD = dataCFD(:,2); % 3D coefficient of lift
 CDragCFD = dataCFD(:,3); % 3D coefficient of drag
 
-L_D_WholeAirplane = CL_3D ./ Dalt ; 
+L_D_WholeAirplane = CL_3D ./ Drag ; 
 L_D_CFD = (CliftCFD./CDragCFD);
 
 %% velocity to achieve max range and max endurance
 
-GOTA = 6.4; % Kg, groos weight
-GOTAWeight = GOTA*9.81;
+Gross = 6.4; % Kg, gross weight
+GrossWeight = Gross*9.81;
 Density = 1.0324 ; %kg/m^3 @ 1.8 km.
 WingArea = 0.63 ; % wing area.
-V_MaxRangeEndurance_Equation = @(CL_V) sqrt ( (2 *( GOTAWeight/WingArea)) / ((Density)*CL_V));
+V_MaxRangeEndurance_Equation = @(CL_V) sqrt ( (2 *( GrossWeight/WingArea)) / ((Density)*CL_V));
 
-CL_Max_Range = sqrt( CD_0alt/k1);
-CL_Max_Endurance = sqrt( (3*CD_0alt)/k1);
+CL_Max_Range = sqrt( CD_0/k1);
+CL_Max_Endurance = sqrt( (3*CD_0)/k1);
 
 
-CL_CD_Ratio_Max_Endurance = GOTAWeight/CD_0alt;
-CL_CD_Ratio_Max_Range = GOTAWeight/CD_0alt;
+CL_CD_Ratio_Max_Endurance = GrossWeight/CD_0;
+CL_CD_Ratio_Max_Range = GrossWeight/CD_0;
 
 V_Max_Range = V_MaxRangeEndurance_Equation(CL_Max_Range);
 V_Max_Endurance = V_MaxRangeEndurance_Equation(CL_Max_Endurance);
@@ -143,7 +143,7 @@ grid minor
 figure(2)
 plot(CL_3D, WingD, '--', 'LineWidth', 2);
 hold on
-plot(CL_3D, Dalt, '--', 'LineWidth', 2);
+plot(CL_3D, Drag, '--', 'LineWidth', 2);
 hold on
 plot(CliftCFD, CDragCFD, '--', 'LineWidth', 2);
 hold off
