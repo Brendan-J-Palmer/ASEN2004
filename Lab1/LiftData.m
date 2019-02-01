@@ -138,32 +138,37 @@ legend('3D Calculated Data', 'CFD Data', '2D Calculated Data', 'Location', 'Sout
 xlabel('\alpha (\circ)');
 ylabel('C_L');
 grid minor
-
 %% compare the Drag with respect to lift
 figure(2)
-plot(CL_3D, WingD, '--', 'LineWidth', 2);
-hold on
 plot(CL_3D, Drag, '--', 'LineWidth', 2);
 hold on
 plot(CliftCFD, CDragCFD, '--', 'LineWidth', 2);
 hold off
 title('Compare Polar Drag Results of Calculated and CFD Data', 'FontSize', 14);
-legend('Finite Wing Drag', 'Polar Drag Whole Aircraft', 'CFD Polar Drag', 'Location', 'Northwest');
+legend('Polar Drag Whole Aircraft Calculated', 'CFD Polar Drag', 'Location', 'Northwest');
+xlabel('C_L');
+ylabel('C_D');
+grid minor
+%% Plot C_D and C_L for a Finite Wing
+figure(3)
+plot(CL_3D, WingD, '--', 'LineWidth', 2);
+hold on
+plot(CL_3D, CDrag, '--', 'LineWidth', 2);
+hold off
+title('Compare Wing Drag Results', 'FontSize', 14);
+legend('Finite Wing Drag Calculated', '2D WIng Drag', 'Location', 'Northwest');
 xlabel('C_L');
 ylabel('C_D');
 grid minor
 %% Plot and compare the C_L/C_D with respect to alpha
-
-figure(3)
-
+figure(4)
 plot(alpha,L_D_WholeAirplane,'*-','LineWidth',1)
 hold on
 plot(alphaCFD,L_D_CFD,'*-','LineWidth',1)
 hold on
 refline(0)
 hold off
-
-legend('3D Wings full L/D','CFD L/D','Location','NorthWest')
+legend('Calculated L/D','CFD L/D','Location','NorthWest')
 xlabel(' \alpha \circ ')
 ylabel('L/D')
 title('L/D Comparison', 'FontSize', 14)
