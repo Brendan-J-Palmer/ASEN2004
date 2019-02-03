@@ -153,10 +153,10 @@ grid minor
 figure(3)
 plot(CL_3D, WingD, '--', 'LineWidth', 2);
 hold on
-plot(CL_3D, CDrag, '--', 'LineWidth', 2);
+plot(Clift, CDrag, '--', 'LineWidth', 2);
 hold off
 title('Compare Wing Drag Results', 'FontSize', 14);
-legend('Finite Wing Drag Calculated', '2D WIng Drag', 'Location', 'Northwest');
+legend('Infinite Wing Drag Calculated', '2D WIng Drag', 'Location', 'Northwest');
 xlabel('C_L');
 ylabel('C_D');
 grid minor
